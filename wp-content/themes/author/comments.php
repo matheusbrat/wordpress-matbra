@@ -1,3 +1,15 @@
+<div class="top-banner entry" style="background:white; padding-top:15px; padding-bottom:15px;">
+	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+	<!-- Wordpress Matbra.com -->
+	<ins class="adsbygoogle"
+	     style="display:block"
+	     data-ad-client="ca-pub-7865232871831497"
+	     data-ad-slot="1027287528"
+	     data-ad-format="auto"></ins>
+	<script>
+	(adsbygoogle = window.adsbygoogle || []).push({});
+	</script>
+</div>	
 <?php
 /* If a post password is required or no comments are given and comments/pings are closed, return. */
 if ( post_password_required() || ( ! have_comments() && ! comments_open() && ! pings_open() ) ) {
