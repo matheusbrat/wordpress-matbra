@@ -3,8 +3,17 @@
 get_template_part( 'content/archive-header' );
 
 ?>
-	<div class="top-banner" style="background:white;">
-		<?php the_ad_placement('manual'); ?>
+	<div class="top-banner entry" style="background:white;">
+		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<!-- Wordpress Matbra.com -->
+		<ins class="adsbygoogle"
+		     style="display:block"
+		     data-ad-client="ca-pub-7865232871831497"
+		     data-ad-slot="1027287528"
+		     data-ad-format="auto"></ins>
+		<script>
+		(adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
 	</div>
 	<div id="loop-container" class="loop-container">
 		<?php
