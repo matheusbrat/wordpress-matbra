@@ -57,8 +57,8 @@ define('LOGGED_IN_SALT',   getenv('WP_LOGGED_IN_SALT'));
 define('NONCE_SALT',       getenv('WP_NONCE_SALT'));
 
 
-define('WP_HOME','http://matbracom.herokuapp.com/');
-define('WP_SITEURL','http://matbracom.herokuapp.com/');
+define('WP_HOME','http://wordpressmatbracom.herokuapp.com/');
+define('WP_SITEURL','http://wordpressmatbracom.herokuapp.com/');
 /**#@-*/
 
 /**
