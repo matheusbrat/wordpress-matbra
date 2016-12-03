@@ -2,7 +2,7 @@
  RewriteEngine On
  RewriteBase /
  RewriteRule ^index\.php$ - [L]
- RewriteRule ^wp-content/uploads/(.*)$ https://s3-us-west-2.amazonaws.com/files.matbra.com/uploads/$1 [L, R=301]
+ RewriteRule ^wp-content/uploads/(.*)$ https://s3-us-west-2.amazonaws.com/files.matbra.com/uploads/$1 [R=301,L]
  RewriteCond %{REQUEST_FILENAME} !-f
  RewriteCond %{REQUEST_FILENAME} !-d
  RewriteRule . /index.php [L]
