@@ -3,6 +3,9 @@
 get_template_part( 'content/archive-header' );
 
 ?>
+	<div class="top-banner" style="background:white;">
+		<?php the_ad_placement('manual'); ?>
+	</div>
 	<div id="loop-container" class="loop-container">
 		<?php
 		if ( have_posts() ) :
