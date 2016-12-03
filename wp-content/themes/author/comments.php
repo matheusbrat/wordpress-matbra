@@ -1,4 +1,4 @@
-<div class="top-banner entry" style="background:white; padding-top:15px; padding-bottom:15px;">
+<div class="personal-banner" style="background:white; padding-top:20px; padding-bottom:20px; margin-top: 1.5em">
 	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 	<!-- Wordpress Matbra.com -->
 	<ins class="adsbygoogle"
