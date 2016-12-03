@@ -1,0 +1,11 @@
+<div class="advads-ad-block-check">
+	<script type="text/javascript" src="<?php echo ADVADS_BASE_URL . 'admin/assets/js/advertisement.js' ?>"></script>
+    <div class="message error" style="display: none;"><p><?php _e( 'Please disable your <strong>AdBlocker</strong> to prevent problems with your ad setup.', 'advanced-ads' ); ?></p></div>
+</div>
+<script>
+jQuery( document ).ready( function() {
+	if ( typeof advanced_ads_adblocker_test === 'undefined' ) {
+		jQuery('.advads-ad-block-check .message').show();
+	}
+} );
+</script>
