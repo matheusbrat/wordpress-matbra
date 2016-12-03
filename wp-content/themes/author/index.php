@@ -3,7 +3,7 @@
 get_template_part( 'content/archive-header' );
 
 ?>
-	<div class="personal-banner" style="background:white; padding-top:20px; padding-bottom:20px; margin-top: 1.5em">
+	<div class="top-personal-banner" style="background:white; padding-top:20px; padding-bottom:20px; margin-bottom: 1.5em">
 		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 		<!-- Wordpress Matbra.com -->
 		<ins class="adsbygoogle"
