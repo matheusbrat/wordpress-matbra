@@ -23,7 +23,6 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 				'block_bots'     => __( 'Block requests from user agents that are known to misbehave with 503.', 'all-in-one-seo-pack' ),
 				'block_refer'    => __( 'Block Referral Spam using HTTP.', 'all-in-one-seo-pack' ),
 				'track_blocks'   => __( 'Log and show recent requests from blocked bots.', 'all-in-one-seo-pack' ),
-				'htaccess_rules' => __( 'Block bad robots via Apache .htaccess rules. Warning: this will change your web server configuration, make sure you are able to edit this file manually as well.', 'all-in-one-seo-pack' ),
 				'edit_blocks'    => __( 'Check this to edit the list of disallowed user agents for blocking bad bots.', 'all-in-one-seo-pack' ),
 				'blocklist'      => __( 'This is the list of disallowed user agents used for blocking bad bots.', 'all-in-one-seo-pack' ),
 				'referlist'      => __( 'This is the list of disallowed referers used for blocking bad bots.', 'all-in-one-seo-pack' ),
@@ -34,7 +33,6 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 				'block_bots'     => array( 'name' => __( 'Block Bad Bots using HTTP', 'all-in-one-seo-pack' ) ),
 				'block_refer'    => array( 'name' => __( 'Block Referral Spam using HTTP', 'all-in-one-seo-pack' ) ),
 				'track_blocks'   => array( 'name' => __( 'Track Blocked Bots', 'all-in-one-seo-pack' ) ),
-				'htaccess_rules' => array( 'name' => __( 'Block Bad Bots using .htaccess', 'all-in-one-seo-pack' ) ),
 				'edit_blocks'    => array( 'name' => __( 'Use Custom Blocklists', 'all-in-one-seo-pack' ) ),
 				'blocklist'      => array(
 					'name'     => __( 'User Agent Blocklist', 'all-in-one-seo-pack' ),
@@ -68,14 +66,6 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 					'condshow' => array( "{$this->prefix}track_blocks" => 'on' ),
 				),
 			);
-			$is_apache             = false;
-			if ( ! empty( $_SERVER['SERVER_SOFTWARE'] ) && stristr( $_SERVER['SERVER_SOFTWARE'], 'Apache' ) !== false ) {
-				$is_apache = true;
-				add_action( $this->prefix . 'settings_update', array( $this, 'generate_htaccess_blocklist' ), 10 );
-			} else {
-				unset( $this->default_options['htaccess_rules'] );
-				unset( $help_text['htaccess_rules'] );
-			}
 
 			if ( ! empty( $help_text ) ) {
 				foreach ( $help_text as $k => $v ) {
@@ -100,13 +90,13 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 					status_header( 503 );
 					$ip         = $this->validate_ip( $_SERVER['REMOTE_ADDR'] );
 					$user_agent = $_SERVER['HTTP_USER_AGENT'];
-					$this->blocked_message( sprintf( __( 'Blocked bot with IP %s -- matched user agent %s found in blocklist.', 'all-in-one-seo-pack' ), $ip, $user_agent ) );
+					$this->blocked_message( sprintf( __( 'Blocked bot with IP %1$s -- matched user agent %2$s found in blocklist.', 'all-in-one-seo-pack' ), $ip, $user_agent ) );
 					exit();
 				} elseif ( $this->option_isset( 'block_refer' ) && $this->is_bad_referer() ) {
 					status_header( 503 );
 					$ip      = $this->validate_ip( $_SERVER['REMOTE_ADDR'] );
 					$referer = $_SERVER['HTTP_REFERER'];
-					$this->blocked_message( sprintf( __( 'Blocked bot with IP %s -- matched referer %s found in blocklist.', 'all-in-one-seo-pack' ), $ip, $referer ) );
+					$this->blocked_message( sprintf( __( 'Blocked bot with IP %1$s -- matched referer %2$s found in blocklist.', 'all-in-one-seo-pack' ), $ip, $referer ) );
 				}
 			}
 		}
@@ -137,52 +127,6 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 
 		}
 
-		function generate_htaccess_blocklist() {
-			if ( ! $this->option_isset( 'htaccess_rules' ) ) {
-
-				if ( insert_with_markers( get_home_path() . '.htaccess', $this->name, '' ) ) {
-					aioseop_output_notice( __( 'Updated .htaccess rules.', 'all-in-one-seo-pack' ) );
-				} else {
-					aioseop_output_notice( __( 'Failed to update .htaccess rules!', 'all-in-one-seo-pack' ), '', 'error' );
-				}
-
-				return;
-
-			}
-
-			if ( function_exists( 'apache_get_modules' ) ) {
-				$modules = apache_get_modules();
-				foreach ( array( 'mod_authz_host', 'mod_setenvif' ) as $m ) {
-					if ( ! in_array( $m, $modules ) ) {
-						aioseop_output_notice( sprintf( __( 'Apache module %s is required!', 'all-in-one-seo-pack' ), $m ), '', 'error' );
-					}
-				}
-			}
-			$botlist = $this->default_bad_bots();
-			$botlist = apply_filters( $this->prefix . 'badbotlist', $botlist );
-			if ( ! empty( $botlist ) ) {
-				$regex      = $this->quote_list_for_regex( $botlist, '"' );
-				$htaccess   = array();
-				$htaccess[] = 'SetEnvIfNoCase User-Agent "' . $regex . '" bad_bot';
-				if ( $this->option_isset( 'edit_blocks' ) && $this->option_isset( 'block_refer' ) && $this->option_isset( 'referlist' ) ) {
-					$referlist = $this->default_bad_referers();
-					$referlist = apply_filters( $this->prefix . 'badreferlist', $botlist );
-					if ( ! empty( $referlist ) ) {
-						$regex      = $this->quote_list_for_regex( $referlist, '"' );
-						$htaccess[] = 'SetEnvIfNoCase Referer "' . $regex . '" bad_bot';
-					}
-				}
-				$htaccess[] = 'Deny from env=bad_bot';
-				if ( insert_with_markers( get_home_path() . '.htaccess', $this->name, $htaccess ) ) {
-					aioseop_output_notice( __( 'Updated .htaccess rules.', 'all-in-one-seo-pack' ) );
-				} else {
-					aioseop_output_notice( __( 'Failed to update .htaccess rules!', 'all-in-one-seo-pack' ), '', 'error' );
-				}
-			} else {
-				aioseop_output_notice( __( 'No rules to update!', 'all-in-one-seo-pack' ), '', 'error' );
-			}
-		}
-
 		/**
 		 * @param $referlist
 		 *
@@ -190,7 +134,7 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 		 */
 		function filter_bad_referlist( $referlist ) {
 			if ( $this->option_isset( 'edit_blocks' ) && $this->option_isset( 'block_refer' ) && $this->option_isset( 'referlist' ) ) {
-				$referlist = explode( "\n", $this->options["{$this->prefix}referlist"] );
+				$referlist = preg_split( '/\r\n|[\r\n]/', $this->options[ "{$this->prefix}referlist" ] );
 			}
 
 			return $referlist;
@@ -203,7 +147,7 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 		 */
 		function filter_bad_botlist( $botlist ) {
 			if ( $this->option_isset( 'edit_blocks' ) && $this->option_isset( 'blocklist' ) ) {
-				$botlist = explode( "\n", $this->options["{$this->prefix}blocklist"] );
+				$botlist = preg_split( '/\r\n|[\r\n]/', $this->options[ "{$this->prefix}blocklist" ] );
 			}
 
 			return $botlist;
@@ -216,16 +160,21 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 		 * @param string $msg
 		 */
 		function blocked_message( $msg ) {
-			if ( empty( $this->options["{$this->prefix}blocked_log"] ) ) {
-				$this->options["{$this->prefix}blocked_log"] = '';
+
+			if ( ! $this->option_isset( 'track_blocks' ) ) {
+				return; // Only log if track blocks is checked.
 			}
-			$this->options["{$this->prefix}blocked_log"] = date( 'Y-m-d H:i:s' ) . " {$msg}\n" . $this->options["{$this->prefix}blocked_log"];
-			if ( $this->strlen( $this->options["{$this->prefix}blocked_log"] ) > 4096 ) {
-				$end = $this->strrpos( $this->options["{$this->prefix}blocked_log"], "\n" );
+
+			if ( empty( $this->options[ "{$this->prefix}blocked_log" ] ) ) {
+				$this->options[ "{$this->prefix}blocked_log" ] = '';
+			}
+			$this->options[ "{$this->prefix}blocked_log" ] = date( 'Y-m-d H:i:s' ) . " {$msg}\n" . $this->options[ "{$this->prefix}blocked_log" ];
+			if ( $this->strlen( $this->options[ "{$this->prefix}blocked_log" ] ) > 4096 ) {
+				$end = $this->strrpos( $this->options[ "{$this->prefix}blocked_log" ], "\n" );
 				if ( false === $end ) {
 					$end = 4096;
 				}
-				$this->options["{$this->prefix}blocked_log"] = $this->substr( $this->options["{$this->prefix}blocked_log"], 0, $end );
+				$this->options[ "{$this->prefix}blocked_log" ] = $this->substr( $this->options[ "{$this->prefix}blocked_log" ], 0, $end );
 			}
 			$this->update_class_option( $this->options );
 		}
@@ -243,8 +192,8 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Bad_Robots' ) ) {
 		function filter_display_options( $options ) {
 
 			if ( $this->option_isset( 'blocked_log' ) ) {
-				if ( preg_match( '/\<(\?php|script)/', $options["{$this->prefix}blocked_log"] ) ) {
-					$options["{$this->prefix}blocked_log"] = "Probable XSS attempt detected!\n" . $options["{$this->prefix}blocked_log"];
+				if ( preg_match( '/\<(\?php|script)/', $options[ "{$this->prefix}blocked_log" ] ) ) {
+					$options[ "{$this->prefix}blocked_log" ] = "Probable XSS attempt detected!\n" . $options[ "{$this->prefix}blocked_log" ];
 				}
 			}
 

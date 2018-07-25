@@ -5,7 +5,7 @@
  * Eventually we'll have subclasses for each.
  *
  * @package All-in-One-SEO-Pack
- * @since   2.3.6
+ * @since   2.3.13
  */
 
 if ( ! class_exists( 'All_in_One_SEO_Pack_Compatibility' ) ) {
@@ -15,7 +15,17 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Compatibility' ) ) {
 	 *
 	 * @since 2.3.6
 	 */
+
 	class All_in_One_SEO_Pack_Compatibility {
+
+		/**
+		 * List of compatibility classes to execute and run.
+		 *
+		 * @since 2.3.12.3
+		 *
+		 * @var array
+		 */
+		protected $classes = array();
 
 		/**
 		 * All_in_One_SEO_Pack_Compatibility constructor.
@@ -32,16 +42,42 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Compatibility' ) ) {
 		 * Load Compatibility Hooks.
 		 *
 		 * @since 2.3.6
+		 * @since 2.3.12.3 Runs hooks located in compatibility classes.
 		 */
 		public function load_compatibility_hooks() {
 			// We'll use this until we set up our classes.
 			if ( class_exists( 'jetpack' ) ) {
 				add_filter( 'jetpack_get_available_modules', array( $this, 'remove_jetpack_sitemap' ) );
-				add_filter( 'jetpack_site_verification_output', array(
-					$this,
-					'filter_jetpack_site_verification_output',
-				), 10, 1 );
+				add_filter(
+					'jetpack_site_verification_output', array(
+						$this,
+						'filter_jetpack_site_verification_output',
+					), 10, 1
+				);
 			}
+
+			// Remove Twitter plugin's meta if our Social Module is on.
+			global $aioseop_options;
+			if ( isset( $aioseop_options['modules']['aiosp_feature_manager_options']['aiosp_feature_manager_enable_opengraph'] ) && $aioseop_options['modules']['aiosp_feature_manager_options']['aiosp_feature_manager_enable_opengraph'] === 'on' ) {
+				add_filter( 'twitter_card', array( $this, 'aioseop_disable_twitter' ) );
+			}
+			// Run compatibility classes
+			for ( $i = count( $this->classes ) - 1; $i >= 0; --$i ) {
+				$this->classes[ $i ]->hooks();
+			}
+		}
+
+		/**
+		 *
+		 * @return bool
+		 */
+		function aioseop_disable_twitter( $card_properties ) {
+
+			if ( apply_filters( 'aioseop_disable_twitter_plugin_card', true ) ) {
+				return false;
+			}
+
+			return $card_properties;
 		}
 
 		/**
@@ -101,8 +137,15 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Compatibility' ) ) {
 		 * Load Compatibility classes.
 		 *
 		 * @since 2.3.6
+		 * @since 2.3.12.3 WPML compatibility loaded.
 		 */
 		public function load_compatibility_classes() {
+			require_once( AIOSEOP_PLUGIN_DIR . 'inc/compatability/compat-wpml.php' ); // Load classes.
+			// Evaluate classes and push them into array
+			$target = new All_in_One_SEO_Pack_Wpml;
+			if ( $target->exists() ) {
+				$this->classes[] = $target;
+			}
 			// Eventually we'll load our other classes from here.
 			$this->load_compatibility_hooks();
 		}
