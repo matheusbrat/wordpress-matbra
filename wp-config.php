@@ -60,6 +60,7 @@ define('S3_UPLOADS_BUCKET', getenv('AWS_S3_BUCKET'));
 define('S3_UPLOADS_KEY', getenv('AWS_S3_KEY'));
 define('S3_UPLOADS_SECRET', getenv('AWS_S3_SECRET'));
 define('S3_UPLOADS_REGION', getenv('AWS_S3_REGION')); 
+define('S3_UPLOADS_BUCKET_URL', getenv('S3_UPLOADS_BUCKET_URL'));
 
 /**#@-*/
 
